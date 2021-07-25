@@ -30,10 +30,11 @@ public class DynamoConfig {
 	@Value("${amazon.aws.region}")
 	private String region;
 
-	@Bean
-	public DynamoDBMapper mapper() {
-		return new DynamoDBMapper(amazonDynamoDB());
-	}
+//	@Bean
+//	public DynamoDBMapper mapper() {
+//		System.out.println("Inside Dynamodb config");
+//		return new DynamoDBMapper(amazonDynamoDB());
+//	}
 
 	@Bean
 	public AwsClientBuilder.EndpointConfiguration endpointConfiguration() {

@@ -1,5 +1,6 @@
 package com.tweetapp.userservice.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -29,30 +30,29 @@ public class UserService {
 	
 	@Transactional
 	public List<User> getAllUsers(){
-//		Query query = new Query(Criteria.where("isLogIn").is(true));
-//		List<User> users = mongoTemplate.find(query, User.class, "user");
-		List<User> users = userRepository.findAllByIsLogIn(true);
-		return users;
+		Iterable<User> users = new ArrayList<User>();
+		try {
+			users = userRepository.findAll();
+		} catch (Exception e) {
+			LOGGER.info("Internal service error");
+		}
+		return (List<User>) users;
 	}
 	
 	@Transactional
 	public User getUser(UserDto userDto) throws UserNotFoundException {
-//		Query query = new Query(Criteria.where("loginId").is(userDto.getLoginId()).andOperator(Criteria.where("password").is(userDto.getPassword())));
-//		user = mongoTemplate.findOne(query, User.class, "user");
 		User user = userRepository.findByLoginIdAndPassword(userDto.getLoginId(),userDto.getPassword());
 		if(user != null) {
-			user.setLoggedIn(userDto.isLogIn());
+			user.setLogIn(true);
 			userRepository.save(user);
-			return user;
 		}else {
 			throw new UserNotFoundException("User Unauthorized");
 		}
+		return user;
 	}
 	
 	@Transactional
 	public User getUserById(String loginId) throws UserNotFoundException {
-//		Query query = new Query(Criteria.where("loginId").is(loginId));
-//		user = mongoTemplate.findOne(query, User.class, "user");
 		User user = userRepository.findByLoginId(loginId);
 		if(user != null) {
 			return user;
@@ -62,11 +62,9 @@ public class UserService {
 	}
 	@Transactional
 	public Message logOutUser(String loginId)  throws UserNotFoundException {
-//		Query query = new Query(Criteria.where("loginId").is(loginId));
-//		user = mongoTemplate.findOne(query, User.class, "user");
 		User user = userRepository.findByLoginId(loginId);
 		if(user != null) {
-			user.setLoggedIn(false);
+			user.setLogIn(false);
 			userRepository.save(user);
 			return new Message("Logged out Successfully");
 		}else {
@@ -78,15 +76,13 @@ public class UserService {
 	
 	@Transactional
 	public Message updateUser(UserDto userDto) throws UserNotFoundException {
-//		Query query = new Query(Criteria.where("loginId").is(userDto.getLoginId()));
-//		user = mongoTemplate.findOne(query, User.class, "user");
 		User user = userRepository.findByLoginId(userDto.getLoginId());
 		if(user != null) {
 			boolean isPwdMatches = userDto.getPassword().equals(user.getPassword()) ? true : false;
 			if(isPwdMatches) {
 				return new Message("New Password should not be same as old password");
 			}else {
-				user.setLoggedIn(userDto.isLogIn());
+				user.setLogIn(userDto.isLogIn());
 				user.setPassword(userDto.getPassword());
 				userRepository.save(user);	
 				return new Message("New Password updated");
@@ -99,8 +95,6 @@ public class UserService {
 	
 	@Transactional
 	public Message insertUser(User user1) throws UserExistException {
-//		Query query = new Query(Criteria.where("loginId").is(user1.getLoginId()));
-//		user = mongoTemplate.findOne(query, User.class, "user");
 		User user = userRepository.findByLoginId(user1.getLoginId());
 		if(user == null) {
 			userRepository.save(user1);	

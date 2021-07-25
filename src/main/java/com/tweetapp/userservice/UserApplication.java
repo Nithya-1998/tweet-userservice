@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
  */
 @SpringBootApplication
 @OpenAPIDefinition
-@ComponentScan(basePackages = "com.tweetapp.userservice.repository")
+@ComponentScan(basePackages = "com.tweetapp.userservice.*")
 public class UserApplication {
 
 	public static void main(String[] args) {
